@@ -41,6 +41,7 @@ MISSING_CATEGORY_LABEL: str = "(Missing)"
 # Theme factory
 # ---------------------------------------------------------------------------
 
+
 def hvi_theme():
     """Return a plotnine theme matching the HVI manuscript aesthetic.
 

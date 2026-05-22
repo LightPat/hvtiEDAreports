@@ -36,6 +36,7 @@ BUFFER_SIZE: int = 65536  # 64 KB read chunks for streaming SHA-256
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def generate_delivery_package(
     data_path: str | pathlib.Path,
     report_path: str | pathlib.Path,
@@ -81,6 +82,7 @@ def generate_delivery_package(
 # Checksum
 # ---------------------------------------------------------------------------
 
+
 def sha256_file(path: str | pathlib.Path) -> str:
     """Return the hex SHA-256 digest of *path* using streaming reads.
 
@@ -120,6 +122,7 @@ def write_sha256_file(
 # ---------------------------------------------------------------------------
 # Manifest builders
 # ---------------------------------------------------------------------------
+
 
 def _build_manifest(
     data_path: pathlib.Path,

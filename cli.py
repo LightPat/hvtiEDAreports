@@ -46,6 +46,7 @@ def _find_quarto() -> str:
 
     # Developer / conda install — require quarto on PATH
     import shutil
+
     quarto = shutil.which("quarto")
     if quarto:
         return quarto
@@ -59,7 +60,8 @@ def _find_quarto() -> str:
 @click.command()
 @click.version_option(version=__version__, prog_name="eda-report")
 @click.option(
-    "--data", "-d",
+    "--data",
+    "-d",
     required=True,
     type=click.Path(exists=True, dir_okay=False, path_type=pathlib.Path),
     help="Path to input data file (.xpt, .sas7bdat, .csv, .pkl).",
@@ -76,7 +78,8 @@ def _find_quarto() -> str:
     help="Report title shown in the HTML header. Defaults to the filename stem.",
 )
 @click.option(
-    "--output-dir", "-o",
+    "--output-dir",
+    "-o",
     default=None,
     type=click.Path(file_okay=False, path_type=pathlib.Path),
     help="Directory to write output files. Defaults to the same directory as --data.",
@@ -114,7 +117,8 @@ def _find_quarto() -> str:
     help="Open the rendered report in the default browser after rendering.",
 )
 @click.option(
-    "--quiet", "-q",
+    "--quiet",
+    "-q",
     is_flag=True,
     default=False,
     help="Suppress progress output.",
@@ -153,13 +157,21 @@ def main(
     # Build quarto render command
     # TODO: confirm quarto 1.5+ param syntax — use embed-resources not self-contained
     cmd = [
-        quarto, "render", str(qmd_path),
-        "--output", str(report_path),
-        "-P", f"data_file:{data}",
-        "-P", f"report_title:{report_title}",
-        "-P", f"cat_unique_max:{cat_max}",
-        "-P", f"suppress_levels_above:{suppress_above}",
-        "-P", f"output_dir:{output_dir}",
+        quarto,
+        "render",
+        str(qmd_path),
+        "--output",
+        str(report_path),
+        "-P",
+        f"data_file:{data}",
+        "-P",
+        f"report_title:{report_title}",
+        "-P",
+        f"cat_unique_max:{cat_max}",
+        "-P",
+        f"suppress_levels_above:{suppress_above}",
+        "-P",
+        f"output_dir:{output_dir}",
     ]
     if x_axis:
         cmd += ["-P", f"x_axis_var:{x_axis}"]

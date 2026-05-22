@@ -26,8 +26,8 @@ from eda.classify import (
 # Classification rules
 # ---------------------------------------------------------------------------
 
-class TestClassificationRules:
 
+class TestClassificationRules:
     def test_boolean_dtype_is_logical(self, synthetic_df):
         """bool dtype columns should always classify as logical."""
         result = classify_dataset(synthetic_df)
@@ -92,8 +92,8 @@ class TestClassificationRules:
 # Missing values
 # ---------------------------------------------------------------------------
 
-class TestMissingValues:
 
+class TestMissingValues:
     def test_column_with_nan_classifies_by_nonmissing_values(self):
         """unique count for classification should use dropna=True."""
         df = pd.DataFrame({"x": [1.0, 2.0, np.nan, np.nan]})
@@ -113,8 +113,8 @@ class TestMissingValues:
 # Threshold overrides
 # ---------------------------------------------------------------------------
 
-class TestThresholdOverrides:
 
+class TestThresholdOverrides:
     def test_custom_cat_max(self, synthetic_df):
         """Raising cat_unique_max should reclassify asa_class as continuous."""
         result = classify_dataset(synthetic_df, cat_unique_max=50)
@@ -130,8 +130,8 @@ class TestThresholdOverrides:
 # Time-axis detection
 # ---------------------------------------------------------------------------
 
-class TestTimeAxisDetection:
 
+class TestTimeAxisDetection:
     def test_procdt_detected_as_time_axis(self, synthetic_df):
         """'procdt' should match the highest-priority TIME_KEYWORDS entry."""
         result = classify_dataset(synthetic_df)
@@ -162,8 +162,8 @@ class TestTimeAxisDetection:
 # ClassifiedDataset API
 # ---------------------------------------------------------------------------
 
-class TestClassifiedDatasetAPI:
 
+class TestClassifiedDatasetAPI:
     def test_variable_type_continuous(self, synthetic_df):
         result = classify_dataset(synthetic_df)
         assert result.variable_type("age") == "continuous"

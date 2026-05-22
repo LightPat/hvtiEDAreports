@@ -17,39 +17,47 @@ class TestHelpers:
 
     def test_ncols_single_variable(self):
         from eda.plots import _ncols
+
         # n=1: max(2, min(4, floor(sqrt(1)))) = max(2,1) = 2
         assert _ncols(1) == 2
 
     def test_ncols_four_variables(self):
         from eda.plots import _ncols
+
         # n=4: max(2, min(4, floor(2))) = 2
         assert _ncols(4) == 2
 
     def test_ncols_nine_variables(self):
         from eda.plots import _ncols
+
         # n=9: max(2, min(4, floor(3))) = 3
         assert _ncols(9) == 3
 
     def test_ncols_sixteen_variables(self):
         from eda.plots import _ncols
+
         # n=16: max(2, min(4, floor(4))) = 4
         assert _ncols(16) == 4
 
     def test_ncols_twenty_five_variables(self):
         from eda.plots import _ncols
+
         # n=25: max(2, min(4, floor(5))) = 4 (capped at 4)
         assert _ncols(25) == 4
 
     def test_ncols_zero(self):
         from eda.plots import _ncols
+
         assert _ncols(0) == 1
 
     def test_axis_title_uses_label_when_available(self):
         from eda.plots import _axis_title
+
         assert _axis_title("age", {"age": "Age at Procedure (years)"}) == "Age at Procedure (years)"
 
     def test_axis_title_falls_back_to_column_name(self):
         from eda.plots import _axis_title
+
         assert _axis_title("age", {}) == "age"
 
     def test_add_missing_category_replaces_nan(self):
@@ -79,6 +87,7 @@ class TestFigureFactories:
     def test_single_var_continuous_returns_ggplot(self, synthetic_df, classified):
         from plotnine import ggplot
         from eda.plots import single_var_plot
+
         p = single_var_plot(synthetic_df, "age", classified)
         assert isinstance(p, ggplot)
 
@@ -86,6 +95,7 @@ class TestFigureFactories:
     def test_single_var_categorical_returns_ggplot(self, synthetic_df, classified):
         from plotnine import ggplot
         from eda.plots import single_var_plot
+
         p = single_var_plot(synthetic_df, "status", classified)
         assert isinstance(p, ggplot)
 
@@ -93,6 +103,7 @@ class TestFigureFactories:
     def test_categorical_panel_returns_ggplot(self, classified):
         from plotnine import ggplot
         from eda.plots import categorical_panel
+
         p = categorical_panel(classified)
         assert isinstance(p, ggplot)
 
@@ -100,6 +111,7 @@ class TestFigureFactories:
     def test_continuous_panel_returns_ggplot(self, classified):
         from plotnine import ggplot
         from eda.plots import continuous_panel
+
         p = continuous_panel(classified)
         assert isinstance(p, ggplot)
 

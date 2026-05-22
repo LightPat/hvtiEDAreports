@@ -25,7 +25,7 @@ Two existing codebases inform this project:
 | [xportEDA](https://github.com/ehrlinger/xportEDA) | R / Shiny | Architecture: variable classification engine, faceted histogram and scatter-plot panels, data summary page, SAS xport file support. |
 | [hvtiPlotR `hv_eda()`](https://github.com/ehrlinger/hvtiPlotR) | R / ggplot2 | Canonical per-variable figure style for CORR publications: scatter+LOESS for continuous, stacked bar for categorical, `(Missing)` as an explicit category. CCF HVI manuscript theme is the visual reference. |
 
-The deliverable is a tool that a data scientist runs once per delivery to produce a polished HTML report and delivery package. End users (collaborators, registry partners) receive and open those files — they never interact with Python or the command line.
+The deliverable is a tool that a data scientist runs once per delivery to produce an HTML report and delivery package. End users (collaborators, registry partners) receive and open those files — they never interact with Python or the command line.
 
 ---
 

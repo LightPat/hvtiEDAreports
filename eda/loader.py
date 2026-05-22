@@ -27,6 +27,7 @@ import pandas as pd
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def load_dataset(path: str | pathlib.Path) -> tuple[pd.DataFrame, dict[str, str]]:
     """Load a dataset from *path* and return ``(df, column_labels)``.
 
@@ -59,20 +60,17 @@ def load_dataset(path: str | pathlib.Path) -> tuple[pd.DataFrame, dict[str, str]
     suffix = path.suffix.lower()
 
     dispatch: dict[str, Any] = {
-        ".csv":     _load_csv,
-        ".xpt":     _load_xpt,
+        ".csv": _load_csv,
+        ".xpt": _load_xpt,
         ".sas7bdat": _load_sas7bdat,
-        ".pkl":     _load_pickle,
-        ".pickle":  _load_pickle,
+        ".pkl": _load_pickle,
+        ".pickle": _load_pickle,
         ".parquet": _load_parquet,
     }
 
     loader_fn = dispatch.get(suffix)
     if loader_fn is None:
-        raise ValueError(
-            f"Unsupported file format: '{suffix}'. "
-            f"Supported: {', '.join(dispatch)}"
-        )
+        raise ValueError(f"Unsupported file format: '{suffix}'. Supported: {', '.join(dispatch)}")
 
     df, column_labels = loader_fn(path)
     df.columns = [str(c) for c in df.columns]
@@ -82,6 +80,7 @@ def load_dataset(path: str | pathlib.Path) -> tuple[pd.DataFrame, dict[str, str]
 # ---------------------------------------------------------------------------
 # Format-specific readers (private)
 # ---------------------------------------------------------------------------
+
 
 def _load_csv(path: pathlib.Path) -> tuple[pd.DataFrame, dict]:
     """Load CSV with UTF-8 / latin-1 encoding fallback."""

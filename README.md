@@ -2,7 +2,7 @@
 
 **Dataset EDA Report Tool** — CORR / CCF Heart & Vascular Institute
 
-Generates a polished, self-contained HTML exploratory data analysis (EDA) report
+Generates a self-contained HTML exploratory data analysis (EDA) report
 for any dataset delivered to clinical collaborators or registry partners. Recipients
 open a single HTML file in any browser — no Python, no setup required.
 

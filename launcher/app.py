@@ -53,6 +53,7 @@ _jobs: dict[str, dict[str, Any]] = {}
 # Routes
 # ---------------------------------------------------------------------------
 
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Any):
     """Serve the launcher UI."""
@@ -132,6 +133,7 @@ async def download(filename: str, output_dir: str):
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def _find_free_port() -> int:
     """Return an available localhost port."""
