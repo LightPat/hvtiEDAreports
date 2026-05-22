@@ -20,14 +20,17 @@ from eda.loader import load_dataset
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def sample_df() -> pd.DataFrame:
     """Minimal DataFrame for round-trip tests."""
-    return pd.DataFrame({
-        "procdt": [20220101, 20220201, 20220301],
-        "age":    [55.0, 62.0, 71.0],
-        "status": ["alive", "dead", "alive"],
-    })
+    return pd.DataFrame(
+        {
+            "procdt": [20220101, 20220201, 20220301],
+            "age": [55.0, 62.0, 71.0],
+            "status": ["alive", "dead", "alive"],
+        }
+    )
 
 
 @pytest.fixture
@@ -64,8 +67,8 @@ def parquet_file(tmp_path, sample_df) -> pathlib.Path:
 # CSV
 # ---------------------------------------------------------------------------
 
-class TestCSVLoader:
 
+class TestCSVLoader:
     def test_csv_loads_correctly(self, csv_file, sample_df):
         df, labels = load_dataset(csv_file)
         assert list(df.columns) == list(sample_df.columns)
@@ -91,8 +94,8 @@ class TestCSVLoader:
 # Pickle
 # ---------------------------------------------------------------------------
 
-class TestPickleLoader:
 
+class TestPickleLoader:
     def test_pickle_round_trip(self, pickle_file, sample_df):
         df, _ = load_dataset(pickle_file)
         pd.testing.assert_frame_equal(df, sample_df)
@@ -110,8 +113,8 @@ class TestPickleLoader:
 # Parquet
 # ---------------------------------------------------------------------------
 
-class TestParquetLoader:
 
+class TestParquetLoader:
     def test_parquet_loads(self, parquet_file, sample_df):
         df, _ = load_dataset(parquet_file)
         assert list(df.columns) == list(sample_df.columns)
@@ -121,8 +124,8 @@ class TestParquetLoader:
 # Error handling
 # ---------------------------------------------------------------------------
 
-class TestErrorHandling:
 
+class TestErrorHandling:
     def test_missing_file_raises(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             load_dataset(tmp_path / "does_not_exist.csv")
@@ -138,8 +141,8 @@ class TestErrorHandling:
 # Column name normalization
 # ---------------------------------------------------------------------------
 
-class TestColumnNormalization:
 
+class TestColumnNormalization:
     def test_integer_column_names_become_strings(self, tmp_path):
         df = pd.DataFrame({0: [1, 2], 1: [3, 4]})
         p = tmp_path / "int_cols.pkl"

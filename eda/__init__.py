@@ -7,6 +7,7 @@ safe to import in CLI, Web UI, and Quarto contexts.
 """
 
 from importlib.metadata import version, PackageNotFoundError
+
 try:
     __version__ = version("hvtiEDAreports")
 except PackageNotFoundError:

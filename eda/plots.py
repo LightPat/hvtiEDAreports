@@ -36,6 +36,7 @@ from eda.theme import hvi_theme, MISSING_CATEGORY_LABEL
 # Panel figures (multi-variable faceted)
 # ---------------------------------------------------------------------------
 
+
 def categorical_panel(classified: ClassifiedDataset):
     """Stacked bar panel for all plottable categorical and logical variables.
 
@@ -91,6 +92,7 @@ def continuous_panel(classified: ClassifiedDataset):
 # Single-variable figure — direct port of hv_eda()
 # ---------------------------------------------------------------------------
 
+
 def single_var_plot(
     df: pd.DataFrame,
     var: str,
@@ -124,6 +126,7 @@ def single_var_plot(
 # ---------------------------------------------------------------------------
 # Helpers (private)
 # ---------------------------------------------------------------------------
+
 
 def _ncols(n: int) -> int:
     """Compute panel column count: max(2, min(4, floor(sqrt(n))))."""

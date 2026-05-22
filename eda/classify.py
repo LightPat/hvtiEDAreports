@@ -46,10 +46,16 @@ CAT_SUPPRESS_LEVELS: int = 20
 They still appear in the summary table."""
 
 TIME_KEYWORDS: list[str] = [
-    "procdt", "opdt", "surgdt",       # procedure / surgery date — highest priority
-    "date", "dt",                      # generic date
-    "time",                            # generic time
-    "visit", "day", "month", "year",   # temporal markers
+    "procdt",
+    "opdt",
+    "surgdt",  # procedure / surgery date — highest priority
+    "date",
+    "dt",  # generic date
+    "time",  # generic time
+    "visit",
+    "day",
+    "month",
+    "year",  # temporal markers
 ]
 """Column name substrings searched in priority order for x-axis auto-detection.
 Add any CCF-standard date/time column name patterns discovered in the
@@ -59,6 +65,7 @@ Azure DevOps delivery repo to this list (see spec §4.5)."""
 # ---------------------------------------------------------------------------
 # Result dataclass
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ClassifiedDataset:
@@ -131,6 +138,7 @@ class ClassifiedDataset:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def classify_dataset(
     df: pd.DataFrame,
