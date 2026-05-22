@@ -52,7 +52,7 @@ def generate_delivery_package(
     data_path:
         Path to the delivered dataset file.
     report_path:
-        Path to the generated HTML report.
+        Path to the generated PDF report.
     classified:
         ClassifiedDataset produced from the dataset.
     output_dir:

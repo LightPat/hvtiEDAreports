@@ -25,7 +25,7 @@ Two existing codebases inform this project:
 | [xportEDA](https://github.com/ehrlinger/xportEDA) | R / Shiny | Architecture: variable classification engine, faceted histogram and scatter-plot panels, data summary page, SAS xport file support. |
 | [hvtiPlotR `hv_eda()`](https://github.com/ehrlinger/hvtiPlotR) | R / ggplot2 | Canonical per-variable figure style for CORR publications: scatter+LOESS for continuous, stacked bar for categorical, `(Missing)` as an explicit category. CCF HVI manuscript theme is the visual reference. |
 
-The deliverable is a tool that a data scientist runs once per delivery to produce an HTML report and delivery package. End users (collaborators, registry partners) receive and open those files — they never interact with Python or the command line.
+The deliverable is a tool that a data scientist runs once per delivery to produce a PDF report and delivery package. End users (collaborators, registry partners) receive and open those files — they never interact with Python or the command line.
 
 ---
 
@@ -33,7 +33,7 @@ The deliverable is a tool that a data scientist runs once per delivery to produc
 
 ### 2.1 Goals
 
-- Produce a single self-contained HTML EDA report for any delivered dataset.
+- Produce a single self-contained PDF EDA report for any delivered dataset.
 - Support SAS xport (`.xpt`), SAS binary (`.sas7bdat`), CSV, and pickle input formats.
 - Replicate xportEDA's variable classification and panel layout logic in Python.
 - Port `hv_eda()` figure style to plotnine: scatter+LOESS for continuous, stacked bar for categorical, missing shown explicitly.
@@ -48,7 +48,7 @@ The deliverable is a tool that a data scientist runs once per delivery to produc
 
 ### 2.2 Non-Goals
 
-- Interactive Shiny-style widgets. The output is a static HTML report.
+- Interactive Shiny-style widgets. The output is a static PDF report.
 - A publicly hosted web service.
 - Datasets > ~150 variables (same practical limit as xportEDA).
 - End users installing or running Python themselves.
@@ -66,8 +66,8 @@ The tool has three layers. The data scientist (or an automated pipeline) operate
 | 2 — Launcher | CLI (`eda-report`) | Console entry point. Wraps `quarto render` with parameter injection. Usable standalone or in a pipeline. |
 | 2 — Launcher | Web UI (`launcher/`) | Local FastAPI + browser UI. User picks a file, sets options, clicks Generate. Calls CLI under the hood. |
 | 2 — Package | PyInstaller bundle | Packages Python + Quarto + all deps into a `.exe` (Windows) or `.app` (macOS). No Python install required. |
-| 3 — Output | HTML report | Self-contained file delivered alongside the dataset. Opens in any browser. No network required. |
-| 3 — Output | Delivery package | `_manifest.json`, `_manifest.md`, `.sha256` — written alongside the HTML report for every render. |
+| 3 — Output | PDF report | Self-contained file delivered alongside the dataset. Opens in any PDF viewer. No network required. |
+| 3 — Output | Delivery package | `_manifest.json`, `_manifest.md`, `.sha256` — written alongside the PDF report for every render. |
 
 ---
 
@@ -119,7 +119,7 @@ hvtiEDAreports/
 | plotnine | 0.13 | Grammar-of-graphics plotting (ggplot2 equivalent) |
 | mizani | 0.11 | plotnine scales / formatting dependency |
 | pyreadstat | 1.2 | SAS `.xpt` and `.sas7bdat` ingestion |
-| great_tables | 0.14 | Formatted HTML summary table |
+| great_tables | 0.14 | Formatted summary table (LaTeX backend for PDF) |
 | fastapi | 0.110 | Local web UI server |
 | uvicorn | 0.29 | ASGI server for FastAPI |
 | jinja2 | 3.1 | HTML template rendering for web UI |
@@ -225,7 +225,7 @@ Define a plotnine theme function matching the hvtiPlotR manuscript aesthetic:
 
 ### 4.7 Delivery Package (`delivery.py`)
 
-For every render, three companion files are written to `output_dir` alongside the HTML report:
+For every render, three companion files are written to `output_dir` alongside the PDF report:
 
 | File | Format | Description |
 |---|---|---|
@@ -249,7 +249,7 @@ The `.sha256` file follows the POSIX `sha256sum` convention: `<hex>  <filename>`
     "columns": 47
   },
   "report": {
-    "filename": "cabg_2025q1_eda.html",
+    "filename": "cabg_2025q1_eda.pdf",
     "sha256": "b7c1..."
   },
   "variable_summary": {
@@ -269,7 +269,7 @@ The `.sha256` file follows the POSIX `sha256sum` convention: `<hex>  <filename>`
 
 **Implementation notes:**
 
-- SHA-256 is computed for both the input dataset and the generated HTML report.
+- SHA-256 is computed for both the input dataset and the generated PDF report.
 - Use `hashlib.sha256` with streaming reads (64 KB chunks) — do not load the whole file into memory.
 - Filenames only — no paths — so the delivery package is portable. The Markdown manifest includes a note: *"Keep all files in the same directory for checksum verification."*
 
@@ -281,12 +281,11 @@ All report parameters must be injectable via the `params` block. The report rend
 ---
 title: "Exploratory Data Analysis"
 format:
-  html:
+  pdf:
     toc: true
     toc-depth: 3
-    code-fold: true
-    embed-resources: true     # single file, no external assets
-    theme: cosmo              # confirm preferred theme at kick-off
+    echo: false               # hide code; show results only
+    pdf-engine: xelatex       # confirm engine and page styling at kick-off
 params:
   data_file: "data/sample.csv"
   x_axis_var: null            # null = auto-detect
@@ -297,7 +296,9 @@ params:
 ---
 ```
 
-> **Note:** Use `embed-resources: true` — not `self-contained: true`, which is deprecated in Quarto 1.5+.
+> **Note:** PDF rendering requires a LaTeX engine. Quarto renders with `xelatex`
+> by default; install it via `quarto install tinytex`. The packaged build must
+> bundle TinyTeX alongside the Quarto binary (see §6.1).
 
 Report sections:
 
@@ -333,13 +334,13 @@ eda-report --help
 |---|---|---|
 | `--data` / `-d` | (required) | Path to input data file |
 | `--x-axis` | auto-detect | Column name to use as x-axis for continuous plots |
-| `--title` | filename stem | Report title shown in HTML header |
+| `--title` | filename stem | Report title shown in the report header |
 | `--output-dir` / `-o` | same dir as data file | Directory to write output files |
 | `--cat-max` | 10 | Unique-value threshold for categorical classification |
 | `--suppress-above` | 20 | Level count above which categorical figures are suppressed |
 | `--no-manifest` | False | Skip manifest and checksum generation |
 | `--manifest-format` | `both` | `json`, `md`, or `both` |
-| `--open` | False | Open the report in the default browser after rendering |
+| `--open` | False | Open the report in the default viewer after rendering |
 | `--quiet` / `-q` | False | Suppress progress output |
 
 ### 5.2 Desktop Web UI (`launcher/`)
@@ -361,8 +362,8 @@ Target user: collaborator or analyst who has received the packaged tool but does
 - **Generate button:** Disabled until a file is selected. Shows a spinner while Quarto renders.
 - **Status area:** Live log output from the render process streamed to the page via WebSocket.
 - **Delivery package section** (appears after successful render):
-  - **Open Report** — opens the HTML file in the default browser.
-  - **Download Report** — downloads the HTML via FastAPI `/download/{filename}` endpoint.
+  - **Open Report** — opens the PDF file in the default viewer.
+  - **Download Report** — downloads the PDF via FastAPI `/download/{filename}` endpoint.
   - **Download Manifest** — downloads the JSON manifest.
   - Status note showing the checksum filename written to output directory.
 - **Error display:** If render fails, show the last 20 lines of stderr in a red-bordered box.
@@ -386,16 +387,17 @@ Target user: collaborator or analyst who has received the packaged tool but does
 
 ### 6.1 PyInstaller Build
 
-The packaged build must include Python, all pip dependencies, and a bundled Quarto binary. Quarto provides standalone binaries for Windows and macOS.
+The packaged build must include Python, all pip dependencies, a bundled Quarto binary, and a bundled TinyTeX distribution. Quarto needs a LaTeX engine to render PDF; TinyTeX supplies it. Quarto provides standalone binaries for Windows and macOS.
 
 1. Download the platform Quarto binary and extract to `installer/quarto/`.
-2. In the PyInstaller spec, add: `datas=[('installer/quarto', 'quarto')]`.
-3. In `cli.py`, detect `sys._MEIPASS` (PyInstaller bundle) and set `QUARTO_PATH` to the bundled binary.
-4. Build: `pyinstaller installer/build_windows.spec --clean --noconfirm`.
-5. Test the resulting `.exe` on a clean Windows VM with no Python installed. This is the only valid acceptance test.
-6. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #7).
+2. Install TinyTeX into the build with `quarto install tinytex` and stage it under `installer/tinytex/`.
+3. In the PyInstaller spec, add: `datas=[('installer/quarto', 'quarto'), ('installer/tinytex', 'tinytex')]`.
+4. In `cli.py`, detect `sys._MEIPASS` (PyInstaller bundle) and set `QUARTO_PATH` to the bundled binary; point Quarto at the bundled TinyTeX.
+5. Build: `pyinstaller installer/build_windows.spec --clean --noconfirm`.
+6. Test the resulting `.exe` on a clean Windows VM with no Python installed — render a sample dataset and confirm the PDF opens. This is the only valid acceptance test.
+7. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #7).
 
-> **Bundle size note:** The Quarto standalone binary is ~100 MB; pandas/numpy/plotnine add another 100–150 MB. Expect the final bundle to be 300–400 MB. Flag if this is a problem for distribution.
+> **Bundle size note:** The Quarto standalone binary is ~100 MB; TinyTeX with the packages a report needs adds ~150–250 MB; pandas/numpy/plotnine add another 100–150 MB. Expect the final bundle to be 400–500 MB. Flag if this is a problem for distribution.
 
 ### 6.2 Developer Installation
 
@@ -408,6 +410,9 @@ conda activate eda-report
 
 # Install Quarto separately — https://quarto.org/docs/get-started/
 # Verify: quarto --version  (should be >= 1.5)
+
+# Install a LaTeX engine for PDF rendering
+quarto install tinytex
 
 pip install -e .
 
@@ -425,7 +430,7 @@ Questions to resolve at kick-off:
 
 1. Where in the delivery workflow does EDA report generation happen — post-delivery, CI pipeline, or manual step?
 2. What is the naming convention for delivered datasets? (Determines default report title and output filename.)
-3. Should the HTML report and manifest be committed back to the DevOps repo alongside the data, or delivered separately?
+3. Should the PDF report and manifest be committed back to the DevOps repo alongside the data, or delivered separately?
 4. Are there additional CCF-standard variable name conventions in the existing codebase to add to `TIME_KEYWORDS`?
 5. Does the DevOps repo already have a Python environment the `eda` package should be added to, or does this live in its own repo?
 
@@ -438,7 +443,7 @@ Questions to resolve at kick-off:
 | 1 — Setup | Repo initialized; `environment.yml` + `requirements.txt` committed; skeleton `eda_report.qmd` renders empty; sample test data in `data/`; Azure DevOps review complete; `TIME_KEYWORDS` updated. | Both | 1–3 |
 | 2 — Core package | `loader.py` (all formats); `classify.py` + `test_classify.py` (>90% coverage); time-axis detection; `ClassifiedDataset` dataclass; `delivery.py` (manifest + checksum); `test_loader.py`. | DS-A | 3–6 |
 | 3 — Plots | `hv_eda()` R source reviewed and documented; `single_var_plot()` implemented and visually compared to R output; `categorical_panel()` and `continuous_panel()`; `theme.py`; `test_plots.py`. | DS-B | 4–8 |
-| 4 — Quarto report | All `eda_report.qmd` sections wired; params fully functional; HTML renders cleanly; `embed-resources: true` verified. | Both | 7–10 |
+| 4 — Quarto report | All `eda_report.qmd` sections wired; params fully functional; PDF renders cleanly; LaTeX engine (xelatex / TinyTeX) verified. | Both | 7–10 |
 | 5 — CLI | `cli.py` with all flags; `eda-report` entry point; `--open` flag; `--no-manifest` flag; exit codes; integration test. | DS-A | 9–11 |
 | 6 — Web UI | FastAPI app; browser launcher; file picker; options panel; WebSocket log streaming; Open Report / Download Report / Download Manifest buttons; error display. | DS-B | 9–12 |
 | 7 — Packaging | PyInstaller specs for Windows and macOS; bundled Quarto binary; tested on clean VMs; README install section. | Both | 12–15 |
@@ -450,7 +455,7 @@ Questions to resolve at kick-off:
 
 | # | Criterion | Owner | Priority |
 |---|---|---|---|
-| 1 | `eda-report --data sample.xpt` produces a valid, self-contained HTML report with no errors. | Both | High |
+| 1 | `eda-report --data sample.xpt` produces a valid, self-contained PDF report with no errors. | Both | High |
 | 2 | Variable classification matches xportEDA output on the same dataset (verified against shinyapps.io demo). | DS-A | High |
 | 3 | Continuous figures use scatter+LOESS; categorical use stacked bar; missing shown as `(Missing)` — matching `hv_eda()` visual style. | DS-B | High |
 | 4 | Faceted panels present for all eligible variables; suppressed variables excluded from panels but present in summary. | DS-B | High |
@@ -459,12 +464,12 @@ Questions to resolve at kick-off:
 | 7 | Packaged `.exe` runs on a clean Windows machine with no Python installed and produces a correct report. | Both | High |
 | 8 | Packaged `.app` runs on a clean macOS machine with no Python installed and produces a correct report. | Both | High |
 | 9 | SAS variable labels used as axis titles where available. | DS-A | Medium |
-| 10 | Data summary table present and readable in HTML output. | DS-A | Medium |
+| 10 | Data summary table present and readable in the PDF output. | DS-A | Medium |
 | 11 | `pytest tests/` passes with >= 90% coverage on `classify.py` and `loader.py`. | DS-A | Medium |
 | 12 | README allows a new team member to install and run from source in under 10 minutes. | DS-B | Medium |
 | 13 | `--open` flag opens the rendered report in the default browser. | DS-A | Low |
 | 14 | Azure DevOps integration point documented (even if not yet implemented). | Both | TBD |
-| 15 | `delivery.py` generates `_manifest.json`, `_manifest.md`, and `.sha256` alongside the HTML report for every render. | DS-A | High |
+| 15 | `delivery.py` generates `_manifest.json`, `_manifest.md`, and `.sha256` alongside the PDF report for every render. | DS-A | High |
 | 16 | SHA-256 in the `.sha256` file verifies against the dataset with `sha256sum -c` on Linux/macOS. | DS-A | High |
 | 17 | Web UI Download Report and Download Manifest buttons deliver files to the browser's download folder. | DS-B | Medium |
 | 18 | `--no-manifest` suppresses manifest and checksum generation without error. | DS-A | Low |
@@ -477,7 +482,7 @@ Questions to resolve at kick-off:
 |---|---|---|
 | 1 | Azure DevOps repo contents: where does EDA report generation fit in the delivery workflow? | John + team |
 | 2 | Additional CCF-standard time/date column name conventions to add to `TIME_KEYWORDS`? | John |
-| 3 | Preferred HTML theme (cosmo, flatly, lux, etc.)? | John |
+| 3 | PDF page styling — fonts, margins, title page layout? | John |
 | 4 | Sample `.xpt` file for testing — must be de-identified or synthetic. | John |
 | 5 | Should output reports and manifests be committed back to the DevOps repo, or only delivered to the collaborator? | John |
 | 6 | macOS code-signing: Apple Developer certificate available, or manual Gatekeeper bypass? | DS-B + IT |
@@ -488,7 +493,7 @@ Questions to resolve at kick-off:
 
 These notes summarise key technical decisions made during spec review. Read before starting each phase.
 
-**`embed-resources: true` (not `self-contained`)** — `self-contained: true` is deprecated in Quarto 1.5+. Use `embed-resources: true` in `eda_report.qmd`. Using the old key may silently produce a non-self-contained report.
+**PDF rendering needs a LaTeX engine** — `eda_report.qmd` uses `format: pdf`, which Quarto renders through `xelatex`. A developer install needs TinyTeX (`quarto install tinytex`); the packaged build must bundle it (see §6.1). A PDF is a single file by nature, so there is no `embed-resources` equivalent to set.
 
 **plotnine LOESS** — `geom_smooth(method='lowess')` is the correct keyword (not `'loess'`). Requires statsmodels >= 0.14 for confidence bands. Prototype against the R `hv_eda()` output before finalising Phase 3.
 

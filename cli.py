@@ -75,7 +75,7 @@ def _find_quarto() -> str:
 @click.option(
     "--title",
     default=None,
-    help="Report title shown in the HTML header. Defaults to the filename stem.",
+    help="Report title shown in the report header. Defaults to the filename stem.",
 )
 @click.option(
     "--output-dir",
@@ -114,7 +114,7 @@ def _find_quarto() -> str:
     "open_browser",
     is_flag=True,
     default=False,
-    help="Open the rendered report in the default browser after rendering.",
+    help="Open the rendered report in the default viewer after rendering.",
 )
 @click.option(
     "--quiet",
@@ -135,7 +135,7 @@ def main(
     open_browser: bool,
     quiet: bool,
 ) -> None:
-    """Generate a self-contained HTML EDA report for a delivered dataset.
+    """Generate a self-contained PDF EDA report for a delivered dataset.
 
     Produces the report plus (by default) a delivery manifest and
     SHA-256 checksum in OUTPUT_DIR.
@@ -145,7 +145,7 @@ def main(
     output_dir.mkdir(parents=True, exist_ok=True)
     report_title = title or data.stem
     report_stem = data.stem
-    report_path = output_dir / f"{report_stem}_eda.html"
+    report_path = output_dir / f"{report_stem}_eda.pdf"
 
     quarto = _find_quarto()
 
@@ -155,7 +155,7 @@ def main(
         raise click.ClickException(f"eda_report.qmd not found at {qmd_path}")
 
     # Build quarto render command
-    # TODO: confirm quarto 1.5+ param syntax — use embed-resources not self-contained
+    # TODO: confirm quarto 1.5+ param syntax — PDF render requires a LaTeX engine (xelatex)
     cmd = [
         quarto,
         "render",
