@@ -2,9 +2,9 @@
 
 **Dataset EDA Report Tool** — CORR / CCF Heart & Vascular Institute
 
-Generates a self-contained HTML exploratory data analysis (EDA) report
+Generates a self-contained PDF exploratory data analysis (EDA) report
 for any dataset delivered to clinical collaborators or registry partners. Recipients
-open a single HTML file in any browser — no Python, no setup required.
+open a single PDF file in any viewer — no Python, no setup required.
 
 [![Version](https://img.shields.io/github/v/release/ehrlinger/hvtiEDAreports?label=version)](https://github.com/ehrlinger/hvtiEDAreports/releases)
 [![CI](https://github.com/ehrlinger/hvtiEDAreports/actions/workflows/ci.yml/badge.svg)](https://github.com/ehrlinger/hvtiEDAreports/actions/workflows/ci.yml)
@@ -41,6 +41,7 @@ open a single HTML file in any browser — no Python, no setup required.
 
 - [Conda](https://docs.conda.io/en/latest/miniconda.html) or [Mamba](https://mamba.readthedocs.io/)
 - [Quarto 1.5+](https://quarto.org/docs/get-started/) — install separately and ensure `quarto` is on your `PATH`
+- A LaTeX engine for PDF rendering — `quarto install tinytex`
 
 ### Install
 
@@ -85,13 +86,13 @@ eda-report --data delivery.xpt --no-manifest
 |---|---|---|
 | `--data` / `-d` | *(required)* | Path to input data file |
 | `--x-axis` | auto-detect | Column name for x-axis on continuous plots |
-| `--title` | filename stem | Report title shown in HTML header |
+| `--title` | filename stem | Report title shown in the report header |
 | `--output-dir` / `-o` | same dir as data | Directory to write output files |
 | `--cat-max` | 10 | Unique-value threshold for categorical classification |
 | `--suppress-above` | 20 | Level count above which categorical figures are suppressed |
 | `--no-manifest` | False | Skip manifest and checksum generation |
 | `--manifest-format` | `both` | `json`, `md`, or `both` |
-| `--open` | False | Open report in default browser after rendering |
+| `--open` | False | Open report in default viewer after rendering |
 | `--quiet` / `-q` | False | Suppress progress output |
 
 ### Desktop Web UI
@@ -109,11 +110,11 @@ python launcher/app.py
 
 ## Output files
 
-For each render, three files are written to `output_dir` alongside the HTML report:
+For each render, three files are written to `output_dir` alongside the PDF report:
 
 | File | Description |
 |---|---|
-| `{stem}_eda.html` | Self-contained EDA report |
+| `{stem}_eda.pdf` | Self-contained EDA report |
 | `{stem}_manifest.json` | Machine-readable delivery record (dimensions, variable counts, parameters, checksums) |
 | `{stem}_manifest.md` | Human-readable version of the manifest |
 | `{stem}.sha256` | SHA-256 checksum of the input dataset (`sha256sum -c` compatible) |
@@ -178,8 +179,9 @@ ruff format .
 
 ## Building the packaged application
 
-See `installer/build.sh`. Requires PyInstaller and a bundled Quarto binary in
-`installer/quarto/`. Tested on clean Windows 10/11 and macOS 13+ VMs with no
+See `installer/build.sh`. Requires PyInstaller, a bundled Quarto binary in
+`installer/quarto/`, and a bundled TinyTeX distribution — Quarto needs a LaTeX
+engine to render PDF. Tested on clean Windows 10/11 and macOS 13+ VMs with no
 Python pre-installed.
 
 ```bash

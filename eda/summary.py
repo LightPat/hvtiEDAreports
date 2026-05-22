@@ -1,7 +1,7 @@
 """
 summary.py — Summary statistics table for the EDA report.
 
-Produces a formatted HTML table via great_tables (>= 0.14).
+Produces a formatted summary table via great_tables (>= 0.14).
 Used in the "Data Summary" section of eda_report.qmd.
 """
 
@@ -19,7 +19,9 @@ def summary_table(classified: ClassifiedDataset):
     For each variable: type, n, n_missing, pct_missing, and type-specific
     statistics (mean/SD/median/IQR for continuous; mode/n_levels for categorical).
 
-    Returns a great_tables GT object suitable for embedding in a Quarto HTML report.
+    Returns a great_tables GT object suitable for embedding in a Quarto PDF report.
+    Note: great_tables PDF output uses its LaTeX backend — verify rendering against
+    the Quarto PDF target during Phase 4 (see spec §4.8).
 
     TODO: implement
     - Compute per-variable statistics from classified.df.

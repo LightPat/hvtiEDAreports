@@ -1,12 +1,11 @@
 ---
 title: "Exploratory Data Analysis"
 format:
-  html:
+  pdf:
     toc: true
     toc-depth: 3
-    code-fold: true
-    embed-resources: true     # single self-contained file; no external assets
-    theme: cosmo
+    echo: false               # hide code; show results only
+    pdf-engine: xelatex
 params:
   data_file: "data/sample.csv"
   x_axis_var: null            # null = auto-detect via TIME_KEYWORDS
