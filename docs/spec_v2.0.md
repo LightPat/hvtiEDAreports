@@ -52,6 +52,13 @@ The deliverable is a tool that a data scientist runs once per delivery to produc
 - A publicly hosted web service.
 - Datasets > ~150 variables (same practical limit as xportEDA).
 - End users installing or running Python themselves.
+- Enterprise-managed installation or app-store distribution. The tool runs from a local folder on the user's desktop (see §2.3).
+
+### 2.3 Assumptions & Risks
+
+The packaged tool runs from a folder on the user's own desktop — it is not installed through an enterprise software-management process. This is deliberate: a prior effort (Lifu's EHR data modules) stalled waiting on enterprise app approval, and local execution sidesteps that gate while keeping PHI on the user's machine.
+
+The risk is that this assumption is unverified. If desktop security policy blocks an unsigned executable from running out of a local folder, the distribution model has to change. Phase 7 must test the packaged build on a managed CCF desktop with policy in effect — a clean VM is not sufficient evidence (see §10, Open Question #7).
 
 ---
 
@@ -103,9 +110,7 @@ hvtiEDAreports/
   docs/
     spec_v2.0.md              # This document
   data/                       # Sample / test data (de-identified or synthetic only)
-  requirements.txt
-  environment.yml
-  pyproject.toml
+  pyproject.toml              # Dependencies and project metadata (uv)
   README.md
 ```
 
@@ -395,7 +400,7 @@ The packaged build must include Python, all pip dependencies, a bundled Quarto b
 4. In `cli.py`, detect `sys._MEIPASS` (PyInstaller bundle) and set `QUARTO_PATH` to the bundled binary; point Quarto at the bundled TinyTeX.
 5. Build: `pyinstaller installer/build_windows.spec --clean --noconfirm`.
 6. Test the resulting `.exe` on a clean Windows VM with no Python installed — render a sample dataset and confirm the PDF opens. This is the only valid acceptance test.
-7. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #7).
+7. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #6).
 
 > **Bundle size note:** The Quarto standalone binary is ~100 MB; TinyTeX with the packages a report needs adds ~150–250 MB; pandas/numpy/plotnine add another 100–150 MB. Expect the final bundle to be 400–500 MB. Flag if this is a problem for distribution.
 
@@ -405,8 +410,8 @@ The packaged build must include Python, all pip dependencies, a bundled Quarto b
 git clone https://github.com/ehrlinger/hvtiEDAreports.git
 cd hvtiEDAreports
 
-conda env create -f environment.yml
-conda activate eda-report
+uv venv
+uv pip install -e ".[dev]"
 
 # Install Quarto separately — https://quarto.org/docs/get-started/
 # Verify: quarto --version  (should be >= 1.5)
@@ -414,10 +419,8 @@ conda activate eda-report
 # Install a LaTeX engine for PDF rendering
 quarto install tinytex
 
-pip install -e .
-
 # Verify
-eda-report --data data/sample.csv --open
+uv run eda-report --data data/sample.csv --open
 ```
 
 ---
@@ -440,7 +443,7 @@ Questions to resolve at kick-off:
 
 | Phase | Deliverables | Owner | Days |
 |---|---|---|---|
-| 1 — Setup | Repo initialized; `environment.yml` + `requirements.txt` committed; skeleton `eda_report.qmd` renders empty; sample test data in `data/`; Azure DevOps review complete; `TIME_KEYWORDS` updated. | Both | 1–3 |
+| 1 — Setup | Repo initialized; dependencies declared in `pyproject.toml` (uv); skeleton `eda_report.qmd` renders empty; sample test data in `data/`; Azure DevOps review complete; `TIME_KEYWORDS` updated. | Both | 1–3 |
 | 2 — Core package | `loader.py` (all formats); `classify.py` + `test_classify.py` (>90% coverage); time-axis detection; `ClassifiedDataset` dataclass; `delivery.py` (manifest + checksum); `test_loader.py`. | DS-A | 3–6 |
 | 3 — Plots | `hv_eda()` R source reviewed and documented; `single_var_plot()` implemented and visually compared to R output; `categorical_panel()` and `continuous_panel()`; `theme.py`; `test_plots.py`. | DS-B | 4–8 |
 | 4 — Quarto report | All `eda_report.qmd` sections wired; params fully functional; PDF renders cleanly; LaTeX engine (xelatex / TinyTeX) verified. | Both | 7–10 |
@@ -486,6 +489,7 @@ Questions to resolve at kick-off:
 | 4 | Sample `.xpt` file for testing — must be de-identified or synthetic. | John |
 | 5 | Should output reports and manifests be committed back to the DevOps repo, or only delivered to the collaborator? | John |
 | 6 | macOS code-signing: Apple Developer certificate available, or manual Gatekeeper bypass? | DS-B + IT |
+| 7 | Will managed CCF desktop security policy allow the packaged executable to run from a local folder? Verify on a real managed machine in Phase 7 — not just a clean VM. | DS team + IT |
 
 ---
 
