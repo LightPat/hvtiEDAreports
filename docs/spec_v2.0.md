@@ -52,6 +52,13 @@ The deliverable is a tool that a data scientist runs once per delivery to produc
 - A publicly hosted web service.
 - Datasets > ~150 variables (same practical limit as xportEDA).
 - End users installing or running Python themselves.
+- Enterprise-managed installation or app-store distribution. The tool runs from a local folder on the user's desktop (see §2.3).
+
+### 2.3 Assumptions & Risks
+
+The packaged tool runs from a folder on the user's own desktop — it is not installed through an enterprise software-management process. This is deliberate: a prior effort (Lifu's EHR data modules) stalled waiting on enterprise app approval, and local execution sidesteps that gate while keeping PHI on the user's machine.
+
+The risk is that this assumption is unverified. If desktop security policy blocks an unsigned executable from running out of a local folder, the distribution model has to change. Phase 7 must test the packaged build on a managed CCF desktop with policy in effect — a clean VM is not sufficient evidence (see §10, Open Question #7).
 
 ---
 
@@ -393,7 +400,7 @@ The packaged build must include Python, all pip dependencies, a bundled Quarto b
 4. In `cli.py`, detect `sys._MEIPASS` (PyInstaller bundle) and set `QUARTO_PATH` to the bundled binary; point Quarto at the bundled TinyTeX.
 5. Build: `pyinstaller installer/build_windows.spec --clean --noconfirm`.
 6. Test the resulting `.exe` on a clean Windows VM with no Python installed — render a sample dataset and confirm the PDF opens. This is the only valid acceptance test.
-7. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #7).
+7. Repeat for macOS. Sign the `.app` with `codesign` if distributing outside the team (see §10, Open Question #6).
 
 > **Bundle size note:** The Quarto standalone binary is ~100 MB; TinyTeX with the packages a report needs adds ~150–250 MB; pandas/numpy/plotnine add another 100–150 MB. Expect the final bundle to be 400–500 MB. Flag if this is a problem for distribution.
 
@@ -482,6 +489,7 @@ Questions to resolve at kick-off:
 | 4 | Sample `.xpt` file for testing — must be de-identified or synthetic. | John |
 | 5 | Should output reports and manifests be committed back to the DevOps repo, or only delivered to the collaborator? | John |
 | 6 | macOS code-signing: Apple Developer certificate available, or manual Gatekeeper bypass? | DS-B + IT |
+| 7 | Will managed CCF desktop security policy allow the packaged executable to run from a local folder? Verify on a real managed machine in Phase 7 — not just a clean VM. | DS team + IT |
 
 ---
 
