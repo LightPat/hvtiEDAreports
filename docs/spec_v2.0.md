@@ -103,9 +103,7 @@ hvtiEDAreports/
   docs/
     spec_v2.0.md              # This document
   data/                       # Sample / test data (de-identified or synthetic only)
-  requirements.txt
-  environment.yml
-  pyproject.toml
+  pyproject.toml              # Dependencies and project metadata (uv)
   README.md
 ```
 
@@ -405,8 +403,8 @@ The packaged build must include Python, all pip dependencies, a bundled Quarto b
 git clone https://github.com/ehrlinger/hvtiEDAreports.git
 cd hvtiEDAreports
 
-conda env create -f environment.yml
-conda activate eda-report
+uv venv
+uv pip install -e ".[dev]"
 
 # Install Quarto separately — https://quarto.org/docs/get-started/
 # Verify: quarto --version  (should be >= 1.5)
@@ -414,10 +412,8 @@ conda activate eda-report
 # Install a LaTeX engine for PDF rendering
 quarto install tinytex
 
-pip install -e .
-
 # Verify
-eda-report --data data/sample.csv --open
+uv run eda-report --data data/sample.csv --open
 ```
 
 ---
@@ -440,7 +436,7 @@ Questions to resolve at kick-off:
 
 | Phase | Deliverables | Owner | Days |
 |---|---|---|---|
-| 1 — Setup | Repo initialized; `environment.yml` + `requirements.txt` committed; skeleton `eda_report.qmd` renders empty; sample test data in `data/`; Azure DevOps review complete; `TIME_KEYWORDS` updated. | Both | 1–3 |
+| 1 — Setup | Repo initialized; dependencies declared in `pyproject.toml` (uv); skeleton `eda_report.qmd` renders empty; sample test data in `data/`; Azure DevOps review complete; `TIME_KEYWORDS` updated. | Both | 1–3 |
 | 2 — Core package | `loader.py` (all formats); `classify.py` + `test_classify.py` (>90% coverage); time-axis detection; `ClassifiedDataset` dataclass; `delivery.py` (manifest + checksum); `test_loader.py`. | DS-A | 3–6 |
 | 3 — Plots | `hv_eda()` R source reviewed and documented; `single_var_plot()` implemented and visually compared to R output; `categorical_panel()` and `continuous_panel()`; `theme.py`; `test_plots.py`. | DS-B | 4–8 |
 | 4 — Quarto report | All `eda_report.qmd` sections wired; params fully functional; PDF renders cleanly; LaTeX engine (xelatex / TinyTeX) verified. | Both | 7–10 |

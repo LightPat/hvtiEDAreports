@@ -39,7 +39,7 @@ open a single PDF file in any viewer — no Python, no setup required.
 
 ### Prerequisites
 
-- [Conda](https://docs.conda.io/en/latest/miniconda.html) or [Mamba](https://mamba.readthedocs.io/)
+- [uv](https://docs.astral.sh/uv/) — Python package and environment manager
 - [Quarto 1.5+](https://quarto.org/docs/get-started/) — install separately and ensure `quarto` is on your `PATH`
 - A LaTeX engine for PDF rendering — `quarto install tinytex`
 
@@ -49,16 +49,14 @@ open a single PDF file in any viewer — no Python, no setup required.
 git clone https://github.com/ehrlinger/hvtiEDAreports.git
 cd hvtiEDAreports
 
-conda env create -f environment.yml
-conda activate eda-report
-
-pip install -e .
+uv venv
+uv pip install -e ".[dev]"
 ```
 
 ### Verify
 
 ```bash
-eda-report --data data/sample.csv --open
+uv run eda-report --data data/sample.csv --open
 ```
 
 ---
@@ -103,7 +101,7 @@ automatically. Pick your data file, set options, click **Generate**.
 Developer launch:
 
 ```bash
-python launcher/app.py
+uv run python launcher/app.py
 ```
 
 ---
@@ -151,9 +149,7 @@ hvtiEDAreports/
     build_macos.spec    # PyInstaller spec (macOS)
     build.sh            # Build script
   data/                 # Sample / test data (de-identified or synthetic only)
-  requirements.txt
-  environment.yml
-  pyproject.toml
+  pyproject.toml        # Dependencies and project metadata (uv)
 ```
 
 ---
@@ -163,7 +159,7 @@ hvtiEDAreports/
 ### Running tests
 
 ```bash
-pytest tests/ -v --cov=eda --cov-report=term-missing
+uv run pytest tests/ -v --cov=eda --cov-report=term-missing
 ```
 
 Coverage target: ≥ 90% on `classify.py` and `loader.py`.
@@ -171,8 +167,8 @@ Coverage target: ≥ 90% on `classify.py` and `loader.py`.
 ### Code style
 
 ```bash
-ruff check .
-ruff format .
+uv run ruff check .
+uv run ruff format .
 ```
 
 ---

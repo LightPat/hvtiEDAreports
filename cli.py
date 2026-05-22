@@ -44,7 +44,7 @@ def _find_quarto() -> str:
         if bundled.exists():
             return str(bundled)
 
-    # Developer / conda install — require quarto on PATH
+    # Developer install (uv venv) — require quarto on PATH
     import shutil
 
     quarto = shutil.which("quarto")
