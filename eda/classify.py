@@ -170,6 +170,13 @@ def classify_dataset(
     -------
     ClassifiedDataset
     """
+
+    #   1. For each column, count unique non-null values (dropna=True).
+    #   2. Apply rules in order (see module docstring).
+    #      - bool dtype counts as logical regardless of unique count.
+    #   3. Detect x_axis_var via _detect_time_axis() unless overridden.
+    #   4. Populate and return ClassifiedDataset.
+    
     if column_labels is None:
         column_labels = {}
 
