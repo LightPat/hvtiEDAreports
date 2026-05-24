@@ -171,12 +171,6 @@ def classify_dataset(
     ClassifiedDataset
     """
 
-    #   1. For each column, count unique non-null values (dropna=True).
-    #   2. Apply rules in order (see module docstring).
-    #      - bool dtype counts as logical regardless of unique count.
-    #   3. Detect x_axis_var via _detect_time_axis() unless overridden.
-    #   4. Populate and return ClassifiedDataset.
-    
     if column_labels is None:
         column_labels = {}
 
@@ -191,21 +185,21 @@ def classify_dataset(
         n_unique = series.nunique()
         dtype = series.dtype
 
-        if pd.api.types.is_bool_dtype(dtype) or n_unique <= logical_max_unique:
-            # Rule 1 + explicit bool handling (logical regardless of count)
+        # Rule 1: logical (bool dtype or <= logical_max_unique unique values)
+        # Uses dtype.kind == "b" instead of pd.api.types.is_bool_dtype
+        if dtype.kind == "b" or n_unique <= logical_max_unique:
             logical.append(col)
             categorical.append(col)
-        elif (
-            pd.api.types.is_object_dtype(dtype)
-            or pd.api.types.is_string_dtype(dtype)
-            or pd.api.types.is_categorical_dtype(dtype)
-        ):
-            # Rule 2
+        # Rule 2: object / string / Categorical dtype
+        # Uses dtype.kind == "O" (covers object + string) + explicit isinstance for CategoricalDtype
+        # (replaces pd.api.types.is_object_dtype / is_string_dtype / is_categorical_dtype)
+        elif dtype.kind == "O" or isinstance(dtype, pd.CategoricalDtype):
             categorical.append(col)
             if n_unique > suppress_levels_above:
                 suppressed.append(col)
-        elif pd.api.types.is_numeric_dtype(dtype):
-            # Rules 3 and 4
+        # Rules 3+4: numeric
+        # Uses dtype.kind in ("i", "f", "u", "c") instead of pd.api.types.is_numeric_dtype
+        elif dtype.kind in ("i", "f", "u", "c"):
             if logical_max_unique < n_unique <= cat_unique_max:
                 # Rule 3
                 categorical.append(col)
@@ -216,7 +210,6 @@ def classify_dataset(
                 continuous.append(col)
         else:
             # Fallback for other dtypes (datetime64, etc.) — treat as categorical
-            # (keeps the classification complete and safe for EDA)
             categorical.append(col)
             if n_unique > suppress_levels_above:
                 suppressed.append(col)
