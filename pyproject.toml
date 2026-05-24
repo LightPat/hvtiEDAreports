@@ -7,7 +7,8 @@ name = "hvtiEDAreports"
 version = "0.1.0"
 description = "Dataset EDA Report Tool — CORR / CCF Heart & Vascular Institute"
 authors = [
-    { name = "John Ehrlinger", email = "john.ehrlinger@gmail.com" }
+    { name = "John Ehrlinger", email = "john.ehrlinger@gmail.com" },
+    { name = "Patrick Seeman", email = "patseem189@gmail.com"}
 ]
 readme = "README.md"
 license = { text = "MIT" }
